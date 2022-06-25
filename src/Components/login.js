@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { connect } from "react-redux";
+import { signinAPI } from "../actions";
 
 const Login = (props) => {
   return (
     <Container>
-      <Nav>
+      <Nav> 
         <a href="/">
           <img src="/images/login-logo.svg" alt="" />
         </a>
@@ -19,7 +21,7 @@ const Login = (props) => {
             <img src="/images/login-hero.svg" alt="" />
         </Hero>
         <Form>
-            <Google>
+            <Google onClick={props.signin}>
                 <img src="/images/google.svg" alt="" />
                 Sign in with Google
             </Google>
@@ -181,4 +183,20 @@ color: rgb(0 0 0 0.6);
 }
 `
 
-export default Login;
+const mapStateToProps = (state) => {
+
+  return {}
+ 
+}
+
+const mapDispatchtoProps = (dispatch) =>({
+
+signin : () => dispatch(signinAPI())
+
+})
+
+
+
+export default connect(mapStateToProps, mapDispatchtoProps)(Login)
+
+
