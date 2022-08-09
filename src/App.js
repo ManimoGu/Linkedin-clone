@@ -30,7 +30,7 @@ function App(props) {
 }
 
 const mapStateToProps = (state) =>{
-  return {}
+  return {} 
 
 }
 
