@@ -7,7 +7,6 @@ const MainSide = (props) => {
  
   const [Showmodel, setShowmodel] = useState("close")
 
-  console.log(Showmodel)
 
   const handleClick  = (e) =>{
    
