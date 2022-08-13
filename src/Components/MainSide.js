@@ -1,117 +1,151 @@
 import React from "react";
 import styled from "styled-components";
-import PostModal from "./PostModal"
-import { useState } from "react";
+import PostModal from "./PostModal";
+import { useState, useEffect } from "react";
+import { connect } from "react-redux";
+import { getArticleAPI } from "../actions";
+import ReactPlayer from "react-player";
 
 const MainSide = (props) => {
- 
-  const [Showmodel, setShowmodel] = useState("close")
+  const [Showmodel, setShowmodel] = useState("close");
 
+  useEffect(() => {
+    props.getArticle();
+  }, []);
 
-  const handleClick  = (e) =>{
-   
+  console.log(props.articles);
+
+  const handleClick = (e) => {
     e.preventDefault();
 
-    switch(Showmodel){
-      case "open" : setShowmodel("close");
-                     break;
-      case "close" : setShowmodel("open")
-                     break;
-      default : setShowmodel("close")
-                break;
+    switch (Showmodel) {
+      case "open":
+        setShowmodel("close");
+        break;
+      case "close":
+        setShowmodel("open");
+        break;
+      default:
+        setShowmodel("close");
+        break;
     }
-
-
-
-
-  }
+  };
 
   return (
-    <Container>
-      <ShareBox>
-        Share
-        <div>
-          <img src="/images/user.svg" alt="" />
-          <button onClick={handleClick}>Start a post</button>
-        </div>
-        <div>
-          <button>
-            <img src="/images/picture.svg" alt="" />
-            <span>Photo</span>
-          </button>
-          <button>
-            <img src="/images/play.svg" alt="" />
-            <span>Video</span>
-          </button>
-          <button>
-            <img src="/images/Calender.svg" alt="" />
-            <span>Event</span>
-          </button>
-          <button>
-            <img src="/images/icon.svg" alt="" />
-            <span>Write article</span>
-          </button>
-        </div>
-      </ShareBox>
-      <div>
-        <Article>
-          <SharedActor>
-            <a>
-            <img src="/images/user.svg" alt="" />
+    <>
+      {props.articles.length === 0 ? (
+        <p>There are no articles</p>
+      ) : (
+        <Container>
+          <ShareBox>
             <div>
-              <span>Title</span>
-              <span>Info</span>
-              <span>Date</span>
-            </div>
-            </a>
-            <button>
-            <img src="/images/dotes.svg" alt="" />
-            </button>
-          </SharedActor>
-          <Description>
-            Description
-          </Description>
-          <SharedImg>
-            <a>
-              <img src="/images/nass on Twitter.svg" alt="" />
-            </a>
-          </SharedImg>
-          <SocialCounts>
-            <li>
-              <button>
-                <img src="/images/d310t2g24pvdy4pt1jkedo4yb.svg" alt="" />
-                <img src="/images/clape.svg" alt="" />
-                <span>75</span>
+              {props.user && props.user.photoURL ? (
+                <img src={props.user.photoURL} alt="" />
+              ) : (
+                <img src="/images/user.svg" alt="" />
+              )}
+              <button
+                onClick={handleClick}
+                disabled={props.loading ? true : false}
+              >
+                Start a post
               </button>
-            </li>
-            <li>
-              <a>
-                2 comments
-              </a>
-            </li>
-          </SocialCounts>
-           <SocialAction>
-          <button>
-           <img src="/images/like-action.svg" alt="" />
-           <span>Like</span>
-          </button>
-          <button>
-            <img src="/images/message.svg" alt="" />
-            <span>Comments</span>
-          </button>
-          <button>
-            <img src="/images/share.svg" alt="" />
-            <span>Share</span>
-          </button>
-          <button>
-            <img src="/images/share2.svg" alt="" />
-            <span>Send</span>
-          </button>
-          </SocialAction>
-        </Article>
-      </div>
-      <PostModal showmodel = {Showmodel} handle = {handleClick}/>
-    </Container>
+            </div>
+            <div>
+              <button>
+                <img src="/images/picture.svg" alt="" />
+                <span>Photo</span>
+              </button>
+              <button>
+                <img src="/images/play.svg" alt="" />
+                <span>Video</span>
+              </button>
+              <button>
+                <img src="/images/Calender.svg" alt="" />
+                <span>Event</span>
+              </button>
+              <button>
+                <img src="/images/icon.svg" alt="" />
+                <span>Write article</span>
+              </button>
+            </div>
+          </ShareBox>
+          <Content>
+            {props.loading && (
+              <img src="./images/circles.svg" alt="" style={{ color: "red" }} />
+            )}
+
+            {props.articles.length > 0 &&
+              props.articles.map((article, key) => (
+                <Article key= {key}>
+                  <SharedActor>
+                    <a>
+                      <img src={article.actor.image } alt="" />
+                      <div>
+                        <span>{article.actor.title}</span>
+                        <span>{article.actor.description}</span>
+                        <span>{}</span>
+                      </div>
+                    </a>
+                    <button>
+                      <img src="/images/dotes.svg" alt="" />
+                    </button>
+                  </SharedActor>
+                  <Description>{article.description}</Description>
+                  <SharedImg>
+                    <a>
+                      {!article.SharedImg && article.video ?
+                       <ReactPlayer width={'100%'} url={article.video}/>
+                       :
+                       (
+                        article.SharedImg &&
+                       <img src={article.SharedImg} alt="" />
+                       )
+                    }
+                      
+                    </a>
+                  </SharedImg>
+
+                  <SocialCounts>
+                    <li>
+                      <button>
+                        <img
+                          src="/images/d310t2g24pvdy4pt1jkedo4yb.svg"
+                          alt=""
+                        />
+                        <img src="/images/clape.svg" alt="" />
+                        <span>75</span>
+                      </button>
+                    </li>
+                    <li>
+                      <a>{article.comments}</a>
+                    </li>
+                  </SocialCounts>
+                  <SocialAction>
+                    <button>
+                      <img src="/images/like-action.svg" alt="" />
+                      <span>Like</span>
+                    </button>
+                    <button>
+                      <img src="/images/message.svg" alt="" />
+                      <span>Comments</span>
+                    </button>
+                    <button>
+                      <img src="/images/share.svg" alt="" />
+                      <span>Share</span>
+                    </button>
+                    <button>
+                      <img src="/images/share2.svg" alt="" />
+                      <span>Send</span>
+                    </button>
+                  </SocialAction>
+                </Article>
+              ))}
+          </Content>
+          <PostModal showmodel={Showmodel} handle={handleClick} />
+        </Container>
+      )}
+    </>
   );
 };
 
@@ -134,187 +168,193 @@ const ShareBox = styled(CommonCard)`
   color: #958b7b;
   margin: 0 0 8px;
   background: white;
-  div{
-    button{
+  div {
+    button {
       outline: none;
-      color: rgba(0,0,0,0.6);
+      color: rgba(0, 0, 0, 0.6);
       font-size: 14px;
       line-height: 1.5;
       min-height: 48px;
       background: transparent;
-      border : none;
+      border: none;
       display: flex;
       align-items: center;
       font-weight: 600;
     }
-    &:first-child{
+    &:first-child {
       display: flex;
       align-items: center;
       padding: 8px 16px 0px 16px;
-      img{
+      img {
         width: 48px;
         border-radius: 50%;
         margin-right: 8px;
       }
-      button{
+      button {
         margin: 4px 0;
         flex-grow: 1;
         border-radius: 35px;
         padding-left: 16px;
-        border : 1px solid rgba(0,0,0,0.15);
+        border: 1px solid rgba(0, 0, 0, 0.15);
         background-color: white;
         text-align: left;
-              
-    }
-  }
-  &:nth-child(2){
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    padding-bottom: 4px;
-
-    button{
-      img{
-        margin : 0 4px 0 -2px;
-
-      }
-      span{
-        color: #70b5f9;
       }
     }
+    &:nth-child(2) {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      padding-bottom: 4px;
+
+      button {
+        img {
+          margin: 0 4px 0 -2px;
+        }
+        span {
+          color: #70b5f9;
+        }
+      }
+    }
   }
-}
 `;
 
 const Article = styled(CommonCard)`
-padding: 0;
-margin: 0 0 8px;
-overflow : visible;
-
-
-`
+  padding: 0;
+  margin: 0 0 8px;
+  overflow: visible;
+`;
 const SharedActor = styled.div`
-padding-right: 40px;
-flex-wrap: nowrap;
-padding: 12px 16px 0;
-margin-bottom: 8px;
-align-items: center;
-display: flex;
-a{
-  margin-right: 12px;
-  flex-grow: 1;
-  overflow: hidden;
+  padding-right: 40px;
+  flex-wrap: nowrap;
+  padding: 12px 16px 0;
+  margin-bottom: 8px;
+  align-items: center;
   display: flex;
-  text-decoration: none;
-
-  img{
-    width: 48px;
-    height: 48px;
-  }
-
-  & > div{
-
-    display: flex;
-    flex-direction: column;
+  a {
+    margin-right: 12px;
     flex-grow: 1;
-    flex-basis: 0;
-    margin-left: 8px;
     overflow: hidden;
-    span{
-      text-align: left;
-      &:first-child{
-        font-size: 14px;
-        font-weight: 700;
-        color: rgba(0,0,0,1);
-      }
-      &:nth-child(n+1){
-        font-size: 12px;
-        color: rgba(0,0,0,0.6)
+    display: flex;
+    text-decoration: none;
+
+    img {
+      width: 48px;
+      height: 48px;
+    }
+
+    & > div {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      flex-basis: 0;
+      margin-left: 8px;
+      overflow: hidden;
+      span {
+        text-align: left;
+        &:first-child {
+          font-size: 14px;
+          font-weight: 700;
+          color: rgba(0, 0, 0, 1);
+        }
+        &:nth-child(n + 1) {
+          font-size: 12px;
+          color: rgba(0, 0, 0, 0.6);
+        }
       }
     }
   }
-}
 
-button{
-  position: absolute;
-  right: 12px;
-  top: 0;
-  background: transparent;
-  border: none;
-  outline: none;
-}
-
-` 
+  button {
+    position: absolute;
+    right: 12px;
+    top: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+  }
+`;
 
 const Description = styled.div`
-padding: 0 16px;
-overflow: hidden;
-color: rgba(0,0,0,0.9);
-font-size: 14px;
-text-align: left;
-
-`
+  padding: 0 16px;
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.9);
+  font-size: 14px;
+  text-align: left;
+`;
 
 const SharedImg = styled.div`
-
-margin-top: 8px;
-width: 100%;
-display: block;
-position: relative;
-background-color: #f9fafb;
-img{
-  object-fit: contain;
+  margin-top: 8px;
   width: 100%;
-  height: 100%;
-}
-
-`
+  display: block;
+  position: relative;
+  background-color: #f9fafb;
+  img {
+    object-fit: contain;
+    width: 100%;
+    height: 100%;
+  }
+`;
 
 const SocialCounts = styled.ul`
-line-height: 1.3;
-display: flex;
-align-items: flex-start;
-overflow: auto;
-margin: 0 16px;
-padding: 8px 0;
-border-bottom: 1px solid #e9e5df;
-list-style: none;
-li{
-  margin-right: 5px;
-  font-size: 12px;
-  button{
-    display: flex;
-  }
-}
-
-`
-const SocialAction = styled.div`
-
-align-items: center;
-display: flex;
-justify-content: flex-start;
-margin: 0;
-min-height: 40px;
-padding: 4px 8px ;
-
-button{
-
-  display: inline-flex;
-  align-items: center;
-  padding: 8px;
-  color: #0a66c2;
-
-  @media (min-width: 768px) {
-    span{
-      margin-left: 8px;
-
+  line-height: 1.3;
+  display: flex;
+  align-items: flex-start;
+  overflow: auto;
+  margin: 0 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e9e5df;
+  list-style: none;
+  li {
+    margin-right: 5px;
+    font-size: 12px;
+    button {
+      display: flex;
+      border: none;
+      background-color: white;
     }
-    
   }
+`;
+const SocialAction = styled.div`
+  align-items: center;
+  display: flex;
+  justify-content: flex-start;
+  margin: 0;
+  min-height: 40px;
+  padding: 4px 8px;
 
-}
+  button {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px;
+    color: #0a66c2;
+    border: none;
+    background-color: white;
 
-`
+    @media (min-width: 768px) {
+      span {
+        margin-left: 8px;
+      }
+    }
+  }
+`;
+const Content = styled.div`
+  text-align: center;
+  & > img {
+    width: 30px;
+  }
+`;
+const mapStateToProps = (state) => {
+  return {
+    user: state.userState.user,
+    loading: state.article.loading,
+    articles: state.article.articles,
+  };
+};
 
+const mapDispatchToProps = (dispatch) => ({
+  getArticle: () => {
+    dispatch(getArticleAPI());
+  },
+});
 
-export default MainSide;
+export default connect(mapStateToProps, mapDispatchToProps)(MainSide);

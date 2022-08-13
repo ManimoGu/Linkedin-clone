@@ -2,12 +2,16 @@ import styled from "styled-components";
 import { useState } from "react";
 import ReactPlayer from "react-player"
 import { connect } from "react-redux";
+import firebase from 'firebase/compat/app';
+import { postArticleAPI } from "../actions";
 
 const PostModal = (props) => {
   const [EditorText, setEditorText] = useState("");
   const [shareImage, setShareImage] = useState("");
   const [videoLink, setVideoLink] = useState("");
   const [assetArea, setAssetArea] = useState("")
+
+
 
   const handleChange = (e) => {
     const image = e.target.files[0];
@@ -31,6 +35,26 @@ const PostModal = (props) => {
     setAssetArea(area)
   }
 
+  const postArticl = (e)=>{
+    e.preventDefault();
+    if( e.target !== e.currentTarget){
+      return;
+    }
+       
+    const payload = {
+      image : shareImage,
+      video : videoLink,
+      user : props.user,
+      description : EditorText,
+      timestamp : firebase.firestore.Timestamp.now()
+    }
+
+     props.postArticle(payload)
+     reset(e)
+  }
+
+
+
   return (
     <>
       {props.showmodel === "open" && (
@@ -51,7 +75,7 @@ const PostModal = (props) => {
                   
                 }
                 
-                <span>Name</span>
+                <span>{props.user.displayName}</span>
               </UserInfo>
               <Editor>
                 <textarea
@@ -75,7 +99,7 @@ const PostModal = (props) => {
                       select an image to share
                     </label> 
                   </p>
-                  {shareImage && <img sr c ={URL.createObjectURL(shareImage)}/>}
+                  {shareImage && <img src ={URL.createObjectURL(shareImage)}/>}
                   </UploadImage>)
                   :
                    assetArea === "media" &&
@@ -102,7 +126,7 @@ const PostModal = (props) => {
                   Anyone
                 </ShareButton>
               </ShareComment>
-              <PostButton disabled={!EditorText ? true : false}>
+              <PostButton disabled={!EditorText ? true : false}  onClick ={ e => postArticl(e)}>
                 Post
               </PostButton>
             </ShareCreation>
@@ -264,7 +288,12 @@ const mapStateToProps= (state) =>{
     user : state.userState.user,
   }
 }
-const mapDispatchToProps = (dispatch) =>({})
+
+const mapDispatchToProps = (dispatch) =>({
+
+  postArticle : (payload) => dispatch(postArticleAPI(payload))
+}
+)
 
 
-export default connect(mapDispatchToProps, mapStateToProps)(PostModal);
+export default connect(mapStateToProps,mapDispatchToProps)(PostModal);
